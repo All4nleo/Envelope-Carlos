@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Envelope Interativo</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Sofia&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #000;
+      --tab-bg: #f9f9f9;
+      --f-color: #db0040;
+      --s-color: #aa003d;
+      --t-color: #a38564;
+      --fo-color: #f9f9f9;
+      --fi-color: #e2e2e2;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      background-color: var(--bg);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+      overflow: hidden;
+      height: 100dvh;
+    }
+
+    .envelop {
+      width: 90vw;
+      max-width: 25rem;
+      aspect-ratio: 1 / 1;
+      position: relative;
+      perspective: 1000px;
+    }
+
+    @media (max-width: 400px) {
+      .envelop {
+        width: 95vw;
+        max-width: 22rem;
+      }
+    }
+
+    .envelop__front-paper,
+    .envelop__back-paper,
+    .envelop__up-paper,
+    .envelop__content {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      bottom: 0;
+      left: 0;
+      border-radius: 0.7rem;
+    }
+
+    .envelop__front-paper {
+      background-color: var(--f-color);
+      border: 0.35rem solid var(--s-color);
+      clip-path: polygon(100% 0%, 50% 70%, 0% 0%, 0% 100%, 100% 100%);
+      z-index: 300;
+    }
+
+    .envelop__back-paper {
+      background-color: var(--s-color);
+      clip-path: polygon(0% 0%, 100% 0%, 90% 100%, 100% 90%);
+      z-index: 100;
+    }
+
+    .envelop__up-paper {
+      background-color: var(--s-color);
+      clip-path: polygon(0% 0%, 100% 0%, 50% 80%);
+      z-index: 400;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Sofia", cursive;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+      user-select: none;
+      transform-origin: top center;
+      transform-style: preserve-3d;
+    }
+
+    .envelop__content {
+      z-index: 200;
+      position: relative;
+    }
+
+    .note {
+      position: absolute;
+      width: 90%;
+      height: 75%;
+      left: 5%;
+      background-color: var(--tab-bg);
+      box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.75);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      font-family: "Sofia", cursive;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.4s ease;
+      overflow: hidden;
+    }
+
+    .note:nth-child(1) {
+      top: 30px;
+      z-index: 1;
+    }
+
+    .note:nth-child(2) {
+      top: 45px;
+      z-index: 2;
+    }
+
+    .note:nth-child(3) {
+      top: 60px;
+      z-index: 3;
+    }
+
+    .note.active {
+      top: -20px !important;
+      z-index: 10 !important;
+      height: 95%;
+    }
+
+    .note__text {
+      opacity: 0;
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .note.active .note__text {
+      opacity: 1;
+      max-height: 100%;
+    }
+
+    .note__text p {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    @media (min-width: 600px) {
+      .note__text p { font-size: 1.15rem; }
+    }
+
+    .particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 999;
+    }
+
+    .particle {
+      position: absolute;
+      font-size: 1.5rem;
+      color: pink;
+      animation: rise 3s linear forwards;
+    }
+
+    @keyframes rise {
+      to {
+        transform: translateY(-100vh) scale(1.5) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    .btn-reset {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background-color: var(--s-color);
+      border: none;
+      border-radius: 0.5rem;
+      color: white;
+      cursor: pointer;
+      font-family: "Sofia", cursive;
+      font-size: 1rem;
+      transition: background-color 0.3s;
+    }
+
+    .btn-reset:hover {
+      background-color: var(--t-color);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="particles"></div>
+
+  <div class="envelop">
+    <div class="envelop__front-paper"></div>
+    <div class="envelop__back-paper"></div>
+    <div class="envelop__up-paper js-up-paper">clique aqui</div>
+    <div class="envelop__content js-envelop-content">
+      <div class="note">
+        <div class="note__text">
+          <p>Meu amor por você ta crescendo a cada dia.</p>
+          <p>Te amo muito! &hearts;</p>
+        </div>
+      </div>
+      <div class="note">
+        <div class="note__text">
+          <p>Quando estou com você o mundo parece mais leve, mais bonito, mais nosso.</p>
+        </div>
+      </div>
+      <div class="note">
+        <div class="note__text">
+          <p>Oii meu principe. Desde que você entrou na minha vida, descobri o verdadeiro significado do amor</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-reset">Fechar Envelope</button>
+
+  <!-- Som de envelope -->
+  <audio id="sound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_1784e6c349.mp3?filename=paper-open-132142.mp3"></audio>
+
+  <script>
+    const upPaper = document.querySelector(".js-up-paper");
+    const notes = document.querySelectorAll(".note");
+    const resetButton = document.querySelector(".btn-reset");
+    const sound = document.getElementById("sound");
+    const particlesContainer = document.querySelector(".particles");
+
+    let isOpen = false;
+
+    function createParticles() {
+      for (let i = 0; i < 20; i++) {
+        const particle = document.createElement("div");
+        particle.classList.add("particle");
+        particle.innerHTML = "❤️";
+        particle.style.left = Math.random() * 100 + "vw";
+        particle.style.top = "100vh";
+        particle.style.fontSize = Math.random() * 20 + 10 + "px";
+        particle.style.animationDuration = 2 + Math.random() * 2 + "s";
+        particlesContainer.appendChild(particle);
+
+        particle.addEventListener("animationend", () => {
+          particle.remove();
+        });
+      }
+    }
+
+    upPaper.addEventListener("click", () => {
+      if (!isOpen) {
+        gsap.to(upPaper, {
+          rotateX: -180,
+          transformOrigin: "top center",
+          duration: 1,
+          ease: "power2.inOut",
+          onStart: () => {
+            sound.play();
+            createParticles();
+          },
+          onComplete: () => {
+            upPaper.style.pointerEvents = "none";
+            upPaper.style.zIndex = "50";
+          }
+        });
+        isOpen = true;
+      }
+    });
+
+    notes.forEach(note => {
+      note.addEventListener("click", () => {
+        if (note.classList.contains("active")) {
+          note.classList.remove("active");
+        } else {
+          notes.forEach(n => n.classList.remove("active"));
+          note.classList.add("active");
+        }
+      });
+    });
+
+    resetButton.addEventListener("click", () => {
+      gsap.to(upPaper, {
+        rotateX: 0,
+        duration: 1,
+        ease: "power2.inOut",
+        onComplete: () => {
+          upPaper.style.pointerEvents = "auto";
+          upPaper.style.zIndex = "400";
+        }
+      });
+      isOpen = false;
+    });
+  </script>
+</body>
+</html>
